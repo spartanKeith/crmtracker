@@ -13,7 +13,9 @@ window.APP_ENV = {
   },
   ACCOUNTS: [
     { username: 'spartan_chard', password: '123', role: 'super_admin', display: 'Chard' },
-    { username: 'spartan_keith', password: '123', role: 'super_admin', display: 'Keith' }
+    { username: 'spartan_keith', password: '123', role: 'super_admin', display: 'Keith' },
+    { username: 'spartan_gift', password: '123', role: 'super_admin', display: 'Gifthel' },
+    { username: 'spartan_rich', password: '123', role: 'super_admin', display: 'Richelle' }
   ],
   MEMBER_ACCOUNT_ROLES: [
     { value: 'viewer', label: 'Viewer' },
