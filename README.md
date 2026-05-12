@@ -12,6 +12,9 @@ Separated static files:
 
 - Username: `spartan_chard` / Password: `123` / Role: Super Admin
 - Username: `spartan_keith` / Password: `123` / Role: Super Admin
+- Username: `spartan_gift` / Password: `123` / Role: Viewer
+- Username: `spartan_richelle` / Password: `123` / Role: Viewer
+
 
 ## CRM Member account creation
 
