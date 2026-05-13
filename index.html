@@ -65,6 +65,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         Reports / Export
       </div>
+      <div class="nav-item" onclick="navigate('dailytracker')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>
+        Daily Tracker
+      </div>
       <div class="nav-item" onclick="navigate('about')">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         About
@@ -331,6 +335,63 @@
       </div>
     </div>
 
+    <!-- DAILY TRACKER PAGE -->
+    <div class="page" id="page-dailytracker">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2>Daily Tracker</h2>
+          <p>Log your daily B.Track activity report.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-tracker" onclick="openTrackerModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Entry
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="section" style="margin-bottom:20px;">
+        <div class="filters-bar">
+          <select id="tracker-name-filter" onchange="renderTracker()">
+            <option value="">All Members</option>
+          </select>
+          <input type="date" id="tracker-date-filter" onchange="renderTracker()" title="Filter by Date">
+          <button class="btn btn-outline btn-sm" onclick="clearTrackerFilters()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Records Table -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Daily Tracker Records</span>
+          <span id="tracker-count" style="font-size:12px;color:var(--text3);font-weight:600;"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date (EOD)</th>
+                <th>Name</th>
+                <th>4SAS</th>
+                <th>RO</th>
+                <th>Feedback</th>
+                <th>SS</th>
+                <th>Selfie</th>
+                <th>Survey</th>
+                <th>B&amp;A</th>
+                <th>VF</th>
+                <th>Unboxing</th>
+                <th>Video Apply</th>
+                <th>Concern</th>
+                <th id="tracker-actions-th">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tracker-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ABOUT PAGE -->
     <div class="page" id="page-about">
       <div class="about-hero">
@@ -343,6 +404,103 @@
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toast-container"></div>
+
+<!-- DAILY TRACKER MODAL -->
+<div class="modal-overlay" id="tracker-modal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <span class="modal-title" id="tracker-modal-title">Add Daily Tracker Entry</span>
+      <button class="modal-close" onclick="closeTrackerModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tracker-edit-id">
+
+      <!-- Date + Name row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date (EOD) *</label>
+          <input type="date" id="tracker-date">
+        </div>
+        <div class="form-group">
+          <label>Name *</label>
+          <select id="tracker-name">
+            <option value="">— Select Member —</option>
+          </select>
+          <div class="form-hint">Active CRM members only.</div>
+        </div>
+      </div>
+
+      <!-- B.TRACK section -->
+      <div class="tracker-section-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        B.TRACK
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>4SAS</label>
+          <input type="number" id="tracker-4sas" min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>RO</label>
+          <input type="number" id="tracker-ro" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Feedback</label>
+        <input type="number" id="tracker-feedback" min="0" placeholder="0" readonly>
+        <div class="form-hint">Auto-computed from SS counts.</div>
+      </div>
+
+      <!-- SS section -->
+      <div class="tracker-section-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        SS
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        <div class="form-group">
+          <label>Screenshot</label>
+          <input type="number" id="tracker-ss" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>Selfie</label>
+          <input type="number" id="tracker-selfie" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>Survey</label>
+          <input type="number" id="tracker-survey" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>B&amp;A</label>
+          <input type="number" id="tracker-bna" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>VF</label>
+          <input type="number" id="tracker-vf" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>Unboxing</label>
+          <input type="number" id="tracker-unboxing" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+        <div class="form-group">
+          <label>Video Apply</label>
+          <input type="number" id="tracker-videoapply" min="0" placeholder="0" oninput="computeTrackerFeedback()">
+        </div>
+      </div>
+
+      <!-- Concern -->
+      <div class="form-group" style="margin-top:4px;">
+        <label>Concern</label>
+        <textarea id="tracker-concern" rows="3" placeholder="Optional notes or concerns..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTrackerModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTrackerEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
 
 <!-- MEMBER MODAL -->
 <div class="modal-overlay" id="member-modal">

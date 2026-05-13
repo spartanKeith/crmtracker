@@ -16,6 +16,7 @@ let state = {
   user: null,
   members: [],
   sasRecords: [],
+  trackerEntries: [],
 };
 
 const PAGE_TITLES = {
@@ -23,6 +24,7 @@ const PAGE_TITLES = {
   members: 'CRM Members',
   monitoring: '4SAS Monitoring',
   reports: 'Reports / Export',
+  dailytracker: 'Daily Tracker',
   about: 'About',
 };
 
@@ -33,14 +35,17 @@ function loadStorage() {
   try {
     const m = localStorage.getItem(STORAGE_KEYS.members);
     const s = localStorage.getItem(STORAGE_KEYS.sasRecords);
+    const t = localStorage.getItem('spartan_tracker');
     if (m) state.members = JSON.parse(m);
     if (s) state.sasRecords = JSON.parse(s);
+    if (t) state.trackerEntries = JSON.parse(t);
   } catch(e) {}
 }
 
 function saveStorage() {
   localStorage.setItem(STORAGE_KEYS.members, JSON.stringify(state.members));
   localStorage.setItem(STORAGE_KEYS.sasRecords, JSON.stringify(state.sasRecords));
+  localStorage.setItem('spartan_tracker', JSON.stringify(state.trackerEntries));
 }
 
 // ============================================================
@@ -119,6 +124,9 @@ function showApp() {
   document.getElementById('btn-export').style.display = adminOnly ? '' : 'none';
   document.getElementById('members-actions-th').style.display = adminOnly ? '' : 'none';
   document.getElementById('sas-actions-th').style.display = adminOnly ? '' : 'none';
+  // Tracker add button — all logged-in users can add their own entries
+  const trackerBtn = document.getElementById('btn-add-tracker');
+  if (trackerBtn) trackerBtn.style.display = '';
 
   navigate('dashboard');
 }
@@ -132,7 +140,7 @@ function navigate(page) {
 
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
-  const pageIndex = ['dashboard','members','monitoring','reports','about'];
+  const pageIndex = ['dashboard','members','monitoring','reports','dailytracker','about'];
   items[pageIndex.indexOf(page)]?.classList.add('active');
 
   document.getElementById('header-title').textContent = PAGE_TITLES[page] || page;
@@ -143,6 +151,7 @@ function navigate(page) {
   if (page === 'members') renderMembers();
   if (page === 'monitoring') render4SAS();
   if (page === 'reports') renderReports();
+  if (page === 'dailytracker') renderTracker();
 }
 
 // ============================================================
@@ -833,6 +842,11 @@ function executeDelete() {
     saveStorage();
     render4SAS();
     showToast('Record deleted.', 'success');
+  } else if (pendingDeleteType === 'tracker') {
+    state.trackerEntries = state.trackerEntries.filter(e => e.id !== pendingDeleteId);
+    saveStorage();
+    renderTracker();
+    showToast('Tracker entry deleted.', 'success');
   }
   closeConfirm();
 }
@@ -859,6 +873,218 @@ function showToast(msg, type = 'info') {
 // ============================================================
 function today() {
   return new Date().toISOString().split('T')[0];
+}
+
+// ============================================================
+//  DAILY TRACKER
+// ============================================================
+function getActiveMembers() {
+  return state.members.filter(m => m.status === 'Active');
+}
+
+function populateTrackerMemberDropdowns() {
+  const activeMembers = getActiveMembers();
+  // Modal dropdown
+  const sel = document.getElementById('tracker-name');
+  if (sel) {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Select Member —</option>';
+    activeMembers.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.name;
+      opt.textContent = m.name;
+      sel.appendChild(opt);
+    });
+    // Pre-select current user if they are a member
+    if (!current && state.user) {
+      const match = activeMembers.find(m => m.name === state.user.display);
+      if (match) sel.value = match.name;
+    } else {
+      sel.value = current;
+    }
+  }
+  // Filter dropdown
+  const fsel = document.getElementById('tracker-name-filter');
+  if (fsel) {
+    const currentF = fsel.value;
+    fsel.innerHTML = '<option value="">All Members</option>';
+    activeMembers.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.name;
+      opt.textContent = m.name;
+      fsel.appendChild(opt);
+    });
+    fsel.value = currentF;
+  }
+}
+
+function renderTracker() {
+  populateTrackerMemberDropdowns();
+
+  const nameF = document.getElementById('tracker-name-filter')?.value || '';
+  const dateF = document.getElementById('tracker-date-filter')?.value || '';
+
+  let filtered = state.trackerEntries.filter(e => {
+    const matchName = !nameF || e.name === nameF;
+    const matchDate = !dateF || e.date === dateF;
+    return matchName && matchDate;
+  });
+
+  filtered.sort((a, b) => {
+    if (b.date !== a.date) return b.date.localeCompare(a.date);
+    return b.id - a.id;
+  });
+
+  const countEl = document.getElementById('tracker-count');
+  if (countEl) countEl.textContent = `${filtered.length} entr${filtered.length !== 1 ? 'ies' : 'y'}`;
+
+  const tbody = document.getElementById('tracker-table');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="16"><div class="empty-state"><p>No tracker entries found.</p></div></td></tr>';
+    return;
+  }
+
+  // Super admin: can edit/delete any; regular user: can edit/delete own entries only
+  tbody.innerHTML = filtered.map((e, i) => {
+    const canEdit = isSuperAdmin() || e.name === state.user?.display;
+    return `
+    <tr>
+      <td style="color:var(--text3);font-size:12px;">${i + 1}</td>
+      <td style="white-space:nowrap;font-weight:600;">${e.date}</td>
+      <td style="white-space:nowrap;">${e.name}</td>
+      <td class="tracker-num">${e.sas4 ?? '—'}</td>
+      <td class="tracker-num">${e.ro ?? '—'}</td>
+      <td class="tracker-num">${e.feedback ?? '—'}</td>
+      <td class="tracker-num">${e.ss ?? '—'}</td>
+      <td class="tracker-num">${e.selfie ?? '—'}</td>
+      <td class="tracker-num">${e.survey ?? '—'}</td>
+      <td class="tracker-num">${e.bna ?? '—'}</td>
+      <td class="tracker-num">${e.vf ?? '—'}</td>
+      <td class="tracker-num">${e.unboxing ?? '—'}</td>
+      <td class="tracker-num">${e.videoapply ?? '—'}</td>
+      <td style="max-width:160px;font-size:12px;color:var(--text2);">${e.concern ? `<span title="${e.concern.replace(/"/g,'&quot;')}">${e.concern.length > 40 ? e.concern.slice(0,40) + '…' : e.concern}</span>` : '—'}</td>
+      <td class="actions-cell">
+        ${canEdit ? `
+          <button class="btn btn-outline btn-sm" onclick="editTrackerEntry(${e.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('tracker', ${e.id})">Delete</button>
+        ` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function clearTrackerFilters() {
+  document.getElementById('tracker-name-filter').value = '';
+  document.getElementById('tracker-date-filter').value = '';
+  renderTracker();
+}
+
+function openTrackerModal(id) {
+  populateTrackerMemberDropdowns();
+  document.getElementById('tracker-modal-title').textContent = id ? 'Edit Tracker Entry' : 'Add Daily Tracker Entry';
+  document.getElementById('tracker-edit-id').value = id || '';
+
+  // Defaults
+  document.getElementById('tracker-date').value = today();
+  // Pre-select current user's name if available
+  const nameSelect = document.getElementById('tracker-name');
+  if (!id && state.user) {
+    const match = getActiveMembers().find(m => m.name === state.user.display);
+    nameSelect.value = match ? match.name : '';
+  }
+  ['4sas','ro','feedback','ss','selfie','survey','bna','vf','unboxing','videoapply'].forEach(f => {
+    document.getElementById('tracker-' + f).value = '';
+  });
+  document.getElementById('tracker-concern').value = '';
+
+  if (id) {
+    const e = state.trackerEntries.find(x => x.id === id);
+    if (e) {
+      document.getElementById('tracker-date').value = e.date || '';
+      nameSelect.value = e.name || '';
+      document.getElementById('tracker-4sas').value = e.sas4 ?? '';
+      document.getElementById('tracker-ro').value = e.ro ?? '';
+      document.getElementById('tracker-feedback').value = e.feedback ?? '';
+      document.getElementById('tracker-ss').value = e.ss ?? '';
+      document.getElementById('tracker-selfie').value = e.selfie ?? '';
+      document.getElementById('tracker-survey').value = e.survey ?? '';
+      document.getElementById('tracker-bna').value = e.bna ?? '';
+      document.getElementById('tracker-vf').value = e.vf ?? '';
+      document.getElementById('tracker-unboxing').value = e.unboxing ?? '';
+      document.getElementById('tracker-videoapply').value = e.videoapply ?? '';
+      document.getElementById('tracker-concern').value = e.concern || '';
+    }
+  }
+  computeTrackerFeedback();
+  document.getElementById('tracker-modal').classList.add('open');
+}
+
+function closeTrackerModal() {
+  document.getElementById('tracker-modal').classList.remove('open');
+}
+
+function editTrackerEntry(id) { openTrackerModal(id); }
+
+function computeTrackerFeedback() {
+  const ssFields = [
+    'tracker-ss',
+    'tracker-selfie',
+    'tracker-survey',
+    'tracker-bna',
+    'tracker-vf',
+    'tracker-unboxing',
+    'tracker-videoapply'
+  ];
+
+  const total = ssFields.reduce((sum, id) => sum + (parseFloat(document.getElementById(id)?.value) || 0), 0);
+  const feedbackInput = document.getElementById('tracker-feedback');
+  if (feedbackInput) feedbackInput.value = total || '';
+  return total;
+}
+
+function getNum(id) {
+  const v = document.getElementById(id)?.value;
+  return v === '' || v === null || v === undefined ? null : parseFloat(v);
+}
+
+function saveTrackerEntry() {
+  const date = document.getElementById('tracker-date').value;
+  const name = document.getElementById('tracker-name').value.trim();
+  if (!date) { showToast('Please select a date.', 'error'); return; }
+  if (!name) { showToast('Please select a name.', 'error'); return; }
+
+  const entry = {
+    date,
+    name,
+    sas4:       getNum('tracker-4sas'),
+    ro:         getNum('tracker-ro'),
+    feedback:   computeTrackerFeedback() || null,
+    ss:         getNum('tracker-ss'),
+    selfie:     getNum('tracker-selfie'),
+    survey:     getNum('tracker-survey'),
+    bna:        getNum('tracker-bna'),
+    vf:         getNum('tracker-vf'),
+    unboxing:   getNum('tracker-unboxing'),
+    videoapply: getNum('tracker-videoapply'),
+    concern:    document.getElementById('tracker-concern').value.trim(),
+    savedBy:    state.user?.display || '',
+  };
+
+  const editId = document.getElementById('tracker-edit-id').value;
+  if (editId) {
+    const idx = state.trackerEntries.findIndex(e => e.id === parseInt(editId));
+    if (idx !== -1) {
+      state.trackerEntries[idx] = { ...state.trackerEntries[idx], ...entry };
+    }
+    showToast('Entry updated!', 'success');
+  } else {
+    state.trackerEntries.push({ id: Date.now(), ...entry });
+    showToast('Entry saved!', 'success');
+  }
+
+  saveStorage();
+  closeTrackerModal();
+  renderTracker();
 }
 
 // ============================================================

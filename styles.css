@@ -849,3 +849,34 @@
 .force-password-overlay .btn-outline {
   display: none !important;
 }
+
+/* ===== DAILY TRACKER ===== */
+.tracker-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 0 4px;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 14px;
+  margin-top: 6px;
+}
+
+.tracker-section-label svg {
+  color: var(--accent);
+}
+
+td.tracker-num {
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+#page-dailytracker .table-wrap table thead th {
+  white-space: nowrap;
+}
