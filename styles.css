@@ -1,7 +1,7 @@
 :root {
-    --primary: #1a3a5c;
-    --primary-light: #1e4976;
-    --accent: #e8703a;
+    --primary: #fdefee;
+    --primary-light: #a96e73;
+    --accent: #de7477;
     --accent-light: #f0a07a;
     --bg: #f0f4f8;
     --surface: #ffffff;
@@ -37,7 +37,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0d2137 0%, #1a3a5c 50%, #1e5080 100%);
+    background: #fdefee;
     position: relative;
     overflow: hidden;
   }
@@ -54,7 +54,6 @@
     position: absolute;
     width: 400px; height: 400px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(30,80,128,0.4) 0%, transparent 70%);
     bottom: -100px; left: -80px;
   }
   .login-card {
@@ -75,13 +74,13 @@
     font-family: 'Syne', sans-serif;
     font-size: 28px;
     font-weight: 800;
-    color: var(--primary);
+    color: #000000;
     letter-spacing: -0.5px;
   }
   .login-logo .brand span { color: var(--accent); }
   .login-logo .sub {
     font-size: 12px;
-    color: var(--text3);
+    color: #de7477;
     margin-top: 4px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -139,12 +138,12 @@
   }
   .btn-primary {
     background: var(--primary);
-    color: #fff;
+    color:  #a96e73;
   }
   .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,58,92,0.3); }
   .btn-accent {
     background: var(--accent);
-    color: #fff;
+    color:#de7477;
   }
   .btn-accent:hover { background: #d4622e; transform: translateY(-1px); }
   .btn-outline {
@@ -199,7 +198,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 20px;
     font-weight: 800;
-    color: #fff;
+    color: #000000;
     letter-spacing: -0.5px;
   }
   .sidebar-brand .brand span { color: var(--accent); }
@@ -228,16 +227,16 @@
     align-items: center;
     gap: 10px;
     padding: 10px 20px;
-    color: rgba(255,255,255,0.65);
+    color: #000000(255,255,255,0.65);
     cursor: pointer;
     transition: all 0.2s;
     border-left: 3px solid transparent;
     font-size: 14px;
     font-weight: 500;
   }
-  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.07); }
+  .nav-item:hover { color: #de7477; background: rgba(255,255,255,0.07); }
   .nav-item.active {
-    color: #fff;
+    color: #de7477;
     background: rgba(232,112,58,0.15);
     border-left-color: var(--accent);
   }
@@ -260,17 +259,17 @@
     justify-content: center;
     font-weight: 700;
     font-size: 13px;
-    color: #fff;
+    color: #fdefee;
     flex-shrink: 0;
   }
   .user-info .name {
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: #de7477;
   }
   .user-info .role {
     font-size: 11px;
-    color: rgba(255,255,255,0.45);
+    color: #a96e73;
     text-transform: capitalize;
   }
 
