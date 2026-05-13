@@ -120,7 +120,7 @@
   }
   .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
     border-color: var(--primary);
-    background: #fff;
+    background: #ffffff;
     box-shadow: 0 0 0 3px rgba(26,58,92,0.1);
   }
   .btn {
@@ -767,7 +767,7 @@
     letter-spacing: 0.5px;
     font-weight: 700;
   }
-  .addto-result-chip.exported .chip-label { color: var(--primary); }
+  .addto-result-chip.exported .chip-label { color: #a96e73; }
   .addto-result-chip.processed .chip-label { color: var(--success); }
   .addto-result-chip.pending-res .chip-label { color: var(--danger); }
   .addto-result-chip .chip-value {
@@ -776,7 +776,7 @@
     font-weight: 700;
     margin-top: 2px;
   }
-  .addto-result-chip.exported .chip-value { color: var(--primary); }
+  .addto-result-chip.exported .chip-value { color: #a96e73; }
   .addto-result-chip.processed .chip-value { color: var(--success); }
   .addto-result-chip.pending-res .chip-value { color: var(--danger); }
 
@@ -835,7 +835,7 @@
 /* ===== MEMBER ACCOUNT ROLE BADGE ===== */
 .badge-role {
   background: #eef2f7;
-  color: var(--primary);
+  color: #000000;
   border: 1px solid #d7e0ea;
 }
 
